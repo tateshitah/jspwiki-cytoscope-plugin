@@ -71,18 +71,26 @@ public class CytoscapePlugin implements WikiPlugin {
 		WikiEngine engine = context.getEngine();
 		readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth);
 
-		result += "hello " + pagename + "<br>\n";
+		// result += "hello " + pagename + "<br>\n";
 		result += "<style>\n";
 		result += "\t#cy {\n";
-		result += "\t\twidth: 80%;\n";
+		result += "\t\twidth: 75%;\n";
 		result += "\t\theight: 100%;\n";
 		result += "\t\tposition: absolute;\n";
-		result += "\t\ttop: 0px;\n";
-		result += "\t\tright: 0px;\n";
+		result += "\t\ttop: 130px;\n";
+		result += "\t\tright: 30px;\n";
 		result += "\t}\n";
 		result += "</style>\n";
 		result += "<div id='cy'></div>\n";
+
+		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br />";
+		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />";
+		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />";
+		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> \n";
+
 		result += "<script src='https://braincopy.org/WebContent/js/cytoscape.js'></script>\n";
+		result += "<script src='https://braincopy.org/WebContent/js/cola.js'></script>\n";
+		result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
 		result += "<script>\n";
 		result += "\tvar cy = cytoscape({\n";
 		result += "\t\tcontainer: document.getElementById('cy'),\n";
@@ -106,10 +114,15 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\t\t{ data: { id: '" + pagename + "' } }\n";
 
 		result += "\t\t],\n";
+
+		result += "\t\tlayout : {\n";
+		result += "\t\t\tname : 'cola',\n";
+		result += "padding: 10},\n";
+
 		result += "\t\tstyle: [{\n";
 		result += "\t\t\tselector: 'node',\n";
 		result += "\t\t\tstyle: {\n";
-		result += "\t\t\t\tshape: 'hexagon',\n";
+		result += "\t\t\t\tshape: 'roundrectangle',\n";
 		result += "\t\t\t\t'background-color': 'red',\n";
 		result += "\t\t\t\tlabel: 'data(id)'\n";
 		result += "\t\t\t}\n";
