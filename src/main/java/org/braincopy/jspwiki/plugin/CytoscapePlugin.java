@@ -72,6 +72,7 @@ public class CytoscapePlugin implements WikiPlugin {
 		readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth);
 
 		// result += "hello " + pagename + "<br>\n";
+		result += "total page number: "+nodeSet.size()+"<br/>\n";
 		result += "<style>\n";
 		result += "\t#cy {\n";
 		result += "\t\twidth: 75%;\n";
