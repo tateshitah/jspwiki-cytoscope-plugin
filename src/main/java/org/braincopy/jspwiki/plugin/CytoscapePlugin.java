@@ -117,7 +117,8 @@ public class CytoscapePlugin implements WikiPlugin {
 
 		result += "\t\tlayout : {\n";
 		result += "\t\t\tname : 'cola',\n";
-		result += "padding: 10},\n";
+		result += "\t\t\tmaxSimulationTime: 600000,\n";
+		result += "\t\t\tpadding: 10},\n";
 
 		result += "\t\tstyle: [{\n";
 		result += "\t\t\tselector: 'node',\n";
@@ -133,6 +134,15 @@ public class CytoscapePlugin implements WikiPlugin {
 		return result;
 	}
 
+	/**
+	 * 
+	 * @param engine
+	 * @param pagename
+	 * @param nodeSet
+	 * @param edgeSet
+	 * @param depth
+	 * @return
+	 */
 	protected String readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<String> nodeSet, TreeSet<Link> edgeSet,
 			int depth) {
 		String result = "";
