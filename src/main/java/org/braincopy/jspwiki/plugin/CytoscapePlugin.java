@@ -69,10 +69,10 @@ public class CytoscapePlugin implements WikiPlugin {
 		TreeSet<Link> edgeSet = new TreeSet<Link>();
 
 		WikiEngine engine = context.getEngine();
-		readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth);
+		result += readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth);
 
 		// result += "hello " + pagename + "<br>\n";
-		result += "total page number: "+nodeSet.size()+"<br/>\n";
+		result += "total page number: " + nodeSet.size() + "<br/>\n";
 		result += "<style>\n";
 		result += "\t#cy {\n";
 		result += "\t\twidth: 75%;\n";
@@ -128,6 +128,16 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\t\t\t'background-color': 'red',\n";
 		result += "\t\t\t\tlabel: 'data(id)'\n";
 		result += "\t\t\t}\n";
+		result += "\t\t},\n";
+		result += "\t\t{\n";
+		result += "\t\t\tselector: 'edge',\n";
+		result += "\t\t\tstyle: {\n";
+		result += "\t\t\t\t'width':1,\n";
+		result += "\t\t\t\t'line-color': '#c0c',\n";
+		result += "\t\t\t\t'target-arrow-shape': 'triangle',\n";
+		result += "\t\t\t\t'target-arrow-color': '#c0c',\n";
+		result += "\t\t\t\t'curve-style': 'segments'\n";
+		result += "\t\t\t}\n";
 		result += "\t\t}]\n";
 		result += "\t});\n";
 		result += "</script>\n";
@@ -147,8 +157,10 @@ public class CytoscapePlugin implements WikiPlugin {
 	protected String readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<String> nodeSet, TreeSet<Link> edgeSet,
 			int depth) {
 		String result = "";
-		if (!nodeSet.contains(pagename) && depth > 0) {
-			nodeSet.add(pagename);
+		if (depth > 0) {
+			if (!nodeSet.contains(pagename)) {
+				nodeSet.add(pagename);
+			}
 			WikiPage page = engine.getPage(pagename);
 			if (page != null) {
 				String pagedata = engine.getPureText(page);

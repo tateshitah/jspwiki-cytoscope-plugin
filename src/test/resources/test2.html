@@ -2040,14 +2040,24 @@ var LocalizedStrings = {
 		],
 		layout : {
 			name : 'cola',
-maxSimulationTime: 600000,
-padding: 10},
+			maxSimulationTime: 600000,
+			padding: 10},
 		style: [{
 			selector: 'node',
 			style: {
 				shape: 'roundrectangle',
 				'background-color': 'red',
 				label: 'data(id)'
+			}
+		},
+		{
+			selector: 'edge',
+			style: {
+				'width':1,
+				'line-color': '#cc0',
+		        'target-arrow-color': '#fcc',
+		        'target-arrow-shape': 'triangle',
+		        'curve-style': 'segments'
 			}
 		}]
 	});
