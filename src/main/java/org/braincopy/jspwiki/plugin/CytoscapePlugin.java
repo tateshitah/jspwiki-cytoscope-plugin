@@ -65,11 +65,11 @@ public class CytoscapePlugin implements WikiPlugin {
 				depth = 3;
 			}
 		}
-		TreeSet<String> nodeSet = new TreeSet<String>();
+		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
 		TreeSet<Link> edgeSet = new TreeSet<Link>();
 
 		WikiEngine engine = context.getEngine();
-		result += readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth);
+		result += readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
 
 		// result += "hello " + pagename + "<br>\n";
 		result += "total page number: " + nodeSet.size() + "<br/>\n";
@@ -89,6 +89,9 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />";
 		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> \n";
 
+		// result += "<script src='/personal/scripts/cytoscape.js'></script>\n";
+		// result += "<script src='/personal/scripts/cola.js'></script>\n";
+		// result += "<script src='/personal/scripts/cytoscape-cola.js'></script>\n";
 		result += "<script src='https://braincopy.org/WebContent/js/cytoscape.js'></script>\n";
 		result += "<script src='https://braincopy.org/WebContent/js/cola.js'></script>\n";
 		result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
@@ -97,12 +100,13 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\tcontainer: document.getElementById('cy'),\n";
 		result += "\t\telements: [\n";
 
-		Iterator<String> localNodesIte = nodeSet.iterator();
+		Iterator<PageInformation> localNodesIte = nodeSet.iterator();
 		Iterator<Link> localLinksIte = edgeSet.iterator();
-		String nodeStr = "";
+		PageInformation nodePageInfo = null;
 		while (localNodesIte.hasNext()) {
-			nodeStr = localNodesIte.next();
-			result += "\t\t\t{ data: { id: '" + nodeStr + "' } },\n";
+			nodePageInfo = localNodesIte.next();
+			result += "\t\t\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
+			result += "\t\t\t\t group: 'L" + nodePageInfo.getStep() + "'} },\n";
 		}
 		Link link = null;
 		while (localLinksIte.hasNext()) {
@@ -125,7 +129,45 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\t\tselector: 'node',\n";
 		result += "\t\t\tstyle: {\n";
 		result += "\t\t\t\tshape: 'roundrectangle',\n";
-		result += "\t\t\t\t'background-color': 'red',\n";
+		result += "\t\t\t\twidth: 20,\n";
+		result += "\t\t\t\theight: 20,\n";
+		result += "\t\t\t\topacity:0.3,\n";
+		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t}\n";
+		result += "\t\t},\n";
+		result += "\t\t{\n";
+		result += "\t\t\tselector: 'node[group=\"L0\"]',\n";
+		result += "\t\t\tstyle: {\n";
+		result += "\t\t\t\tshape: 'roundrectangle',\n";
+		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t\twidth: 50,\n";
+		result += "\t\t\t\theight: 50,\n";
+		result += "\t\t\t\topacity:0.9,\n";
+		result += "\t\t\t\t'font-size': 30,\n";
+		result += "\t\t\t\tlabel: 'data(id)'\n";
+		result += "\t\t\t}\n";
+		result += "\t\t},\n";
+		result += "\t\t{\n";
+		result += "\t\t\tselector: 'node[group=\"L1\"]',\n";
+		result += "\t\t\tstyle: {\n";
+		result += "\t\t\t\tshape: 'roundrectangle',\n";
+		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t\twidth: 40,\n";
+		result += "\t\t\t\theight: 40,\n";
+		result += "\t\t\t\topacity:0.8,\n";
+		result += "\t\t\t\t'font-size': 20,\n";
+		result += "\t\t\t\tlabel: 'data(id)'\n";
+		result += "\t\t\t}\n";
+		result += "\t\t},\n";
+		result += "\t\t{\n";
+		result += "\t\t\tselector: 'node[group=\"L2\"]',\n";
+		result += "\t\t\tstyle: {\n";
+		result += "\t\t\t\tshape: 'roundrectangle',\n";
+		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t\twidth: 30,\n";
+		result += "\t\t\t\theight: 30,\n";
+		result += "\t\t\t\topacity:0.7,\n";
+		result += "\t\t\t\t'font-size': 10,\n";
 		result += "\t\t\t\tlabel: 'data(id)'\n";
 		result += "\t\t\t}\n";
 		result += "\t\t},\n";
@@ -154,13 +196,12 @@ public class CytoscapePlugin implements WikiPlugin {
 	 * @param depth
 	 * @return
 	 */
-	protected String readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<String> nodeSet, TreeSet<Link> edgeSet,
-			int depth) {
+	protected String readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
+			TreeSet<Link> edgeSet, int depth, int max_depth) {
 		String result = "";
+		PageInformation tmpPageInfo = new PageInformation(pagename, max_depth - depth);
 		if (depth > 0) {
-			if (!nodeSet.contains(pagename)) {
-				nodeSet.add(pagename);
-			}
+			checkAndAdd(nodeSet, tmpPageInfo);
 			WikiPage page = engine.getPage(pagename);
 			if (page != null) {
 				String pagedata = engine.getPureText(page);
@@ -176,12 +217,37 @@ public class CytoscapePlugin implements WikiPlugin {
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
 					edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), pagename, distName));
-					result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1);
+					result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1, max_depth);
 				}
 			} else {
 				result += pagename + " seem not exist.<br>\n";
 			}
 		}
+		return result;
+	}
+
+	/**
+	 * If this method return false, you should add the pageInformation object to
+	 * nodeSet.
+	 * 
+	 * @param nodeSet
+	 * @param checkingPageInfo
+	 * @return
+	 */
+	protected boolean checkAndAdd(TreeSet<PageInformation> nodeSet, PageInformation checkingPageInfo) {
+		boolean result = false;
+		for (PageInformation pageInfo : nodeSet) {
+			if (pageInfo.getPageName().equals(checkingPageInfo.getPageName())) {
+				if (pageInfo.getStep() <= checkingPageInfo.getStep()) {
+					result = true;
+				} else {
+					nodeSet.remove(pageInfo);
+				}
+				break;
+			}
+		}
+		if (!result)
+			nodeSet.add(checkingPageInfo);
 		return result;
 	}
 }

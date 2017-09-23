@@ -394,9 +394,9 @@ var LocalizedStrings = {
 </style>
 <div id='cy'></div>
 <br /> <br /> <br /> <br /> <br /> <br /> <br /><br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /><br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /><br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> 
-<script src='https://braincopy.org/WebContent/js/cytoscape.js'></script>
-<script src='https://braincopy.org/WebContent/js/cola.js'></script>
-<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>
+<script src='/personal/scripts/cytoscape.js'></script>
+<script src='/personal/scripts/cola.js'></script>
+<script src='/personal/scripts/cytoscape-cola.js'></script>
 <script>
 	var cy = cytoscape({
 		container: document.getElementById('cy'),
@@ -439,7 +439,13 @@ var LocalizedStrings = {
 			{ data: { id: 'ISH_Halloween' } },
 			{ data: { id: 'InternationalStudentHouse' } },
 			{ data: { id: 'Japan Night' } },
-			{ data: { id: 'KM_TOP' } },
+			{ 
+				data: 
+				{ 
+					id: 'KM_TOP', 
+					group: 'L1' 
+				} 
+			},
 			{ data: { id: 'KM_WBS' } },
 			{ data: { id: 'Knowledge' } },
 			{ data: { id: 'KnowledgeManagement' } },
@@ -2047,7 +2053,18 @@ var LocalizedStrings = {
 			style: {
 				shape: 'roundrectangle',
 				'background-color': 'red',
-				label: 'data(id)'
+			}
+		},
+		{
+			selector:'node[group="L1"]',
+			style:{
+				shape: 'roundrectangle',
+				width: 50,
+				height: 50,
+				'background-color': 'blue',
+				label: 'data(id)',
+				opacity:0.5,
+				'font-size': 30
 			}
 		},
 		{
@@ -2055,7 +2072,7 @@ var LocalizedStrings = {
 			style: {
 				'width':1,
 				'line-color': '#cc0',
-		        'target-arrow-color': '#fcc',
+		        'target-arrow-color': '#c0c',
 		        'target-arrow-shape': 'triangle',
 		        'curve-style': 'segments'
 			}
