@@ -132,14 +132,15 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\t\t\twidth: 20,\n";
 		result += "\t\t\t\theight: 20,\n";
 		result += "\t\t\t\topacity:0.3,\n";
-		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t\t'background-color': 'red',\n";
 		result += "\t\t\t}\n";
 		result += "\t\t},\n";
 		result += "\t\t{\n";
 		result += "\t\t\tselector: 'node[group=\"L0\"]',\n";
 		result += "\t\t\tstyle: {\n";
 		result += "\t\t\t\tshape: 'roundrectangle',\n";
-		result += "\t\t\t\t'background-color': 'blue',\n";
+		result += "\t\t\t\t'background-color': 'red',\n";
+		result += "\t\t\t\t'background-image': 'attach/KM_TOP/b72ba78e278e5f14.JPG',\n";
 		result += "\t\t\t\twidth: 50,\n";
 		result += "\t\t\t\theight: 50,\n";
 		result += "\t\t\t\topacity:0.9,\n";

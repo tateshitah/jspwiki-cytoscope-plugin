@@ -29,13 +29,11 @@ public class PageInformation extends Information {
 	int step;
 
 	public PageInformation(String pagename) {
-		this.name = pagename;
-		this.id = pagename;
+		super(pagename);
 	}
 
 	public PageInformation(String pagename, int _step) {
-		this.name = pagename;
-		this.id = pagename;
+		super(pagename);
 		this.step = _step;
 	}
 

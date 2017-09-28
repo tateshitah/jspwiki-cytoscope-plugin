@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.braincopy.jspwiki.plugin</groupId>
-	<version>0.3.9</version>
+	<version>0.4.3</version>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -16,6 +16,13 @@
 			<version>2.10.1</version>
 			<classifier>classes</classifier>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.braincopy</groupId>
+			<artifactId>braincopy</artifactId>
+			<version>0.0.1</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/braincopy-0.0.1.jar</systemPath>
 		</dependency>
     	</dependencies>
 	<artifactId>cytoscape-plugin</artifactId>
