@@ -56,6 +56,12 @@ public class CytoscapePlugin implements WikiPlugin {
 			pagename = params.get("page");
 		}
 
+		String pagename_url_param = null;
+		pagename_url_param = context.getHttpParameter("target_node");
+		if (pagename_url_param != null) {
+			pagename = pagename_url_param;
+		}
+
 		int depth = 3;
 		if (params.get("depth") != null) {
 			try {
@@ -71,22 +77,19 @@ public class CytoscapePlugin implements WikiPlugin {
 		WikiEngine engine = context.getEngine();
 		result += readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
 
-		// result += "hello " + pagename + "<br>\n";
+		result += "hello " + pagename + "<br>\n";
 		result += "total page number: " + nodeSet.size() + "<br/>\n";
 		result += "<style>\n";
 		result += "\t#cy {\n";
-		result += "\t\twidth: 75%;\n";
+		result += "\t\twidth: 95%;\n";
 		result += "\t\theight: 100%;\n";
 		result += "\t\tposition: absolute;\n";
-		result += "\t\ttop: 130px;\n";
+		result += "\t\ttop: 30px;\n";
 		result += "\t\tright: 30px;\n";
 		result += "\t}\n";
 		result += "</style>\n";
 		result += "<div id='cy'></div>\n";
 
-		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br />";
-		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />";
-		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br />";
 		result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> \n";
 
 		// result += "<script src='/personal/scripts/cytoscape.js'></script>\n";
@@ -182,6 +185,15 @@ public class CytoscapePlugin implements WikiPlugin {
 		result += "\t\t\t\t'curve-style': 'segments'\n";
 		result += "\t\t\t}\n";
 		result += "\t\t}]\n";
+		result += "\t});\n";
+		result += "\tcy.on('click', 'node', function(evt) {\n";
+		result += "\t\tvar arg = new Object;\n";
+		result += "\t\tvar pair=location.search.substring(1).split('&');\n";
+		result += "\t\tfor(var i=0;pair[i];i++) {\n";
+		result += "\t\t\tvar kv = pair[i].split('=');\n";
+		result += "\t\t\targ[kv[0]]=kv[1];\n";
+		result += "\t\t}\n";
+		result += "\t\twindow.location.href='Wiki.jsp?page='+arg.page+'&target_node='+this.id();\n";
 		result += "\t});\n";
 		result += "</script>\n";
 
