@@ -88,11 +88,11 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "total page number: " + nodeSet.size() + "<br/>\n";
 			result += "<style>\n";
 			result += "\t#cy {\n";
-			result += "\t\twidth: 95%;\n";
-			result += "\t\theight: 100%;\n";
+			result += "\t\twidth: 90%;\n";
+			result += "\t\theight: 500px;\n";
 			result += "\t\tposition: absolute;\n";
-			result += "\t\ttop: 30px;\n";
-			result += "\t\tleft: 100px;\n";
+			result += "\t\ttop: 10px;\n";
+			result += "\t\tleft: 10%;\n";
 			result += "\t}\n";
 			result += "</style>\n";
 			result += "<div id='cy'></div>\n";
@@ -299,7 +299,9 @@ public class CytoscapePlugin implements WikiPlugin {
 				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
-					edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), pagename, distName));
+					if (depth > 1) {
+						edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), pagename, distName));
+					}
 					result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1, max_depth);
 				}
 			} else {
