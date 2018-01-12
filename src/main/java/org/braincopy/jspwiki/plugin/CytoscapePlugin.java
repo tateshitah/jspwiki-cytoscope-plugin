@@ -22,6 +22,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.braincopy.jspwiki.plugin;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -76,6 +78,20 @@ public class CytoscapePlugin implements WikiPlugin {
 				depth = 3;
 			}
 		}
+
+		String layout = "cola";
+		String tempLayout = "";
+		if (params.get("layout") != null) {
+			tempLayout = params.get("layout");
+			if (tempLayout.equals("cose")) {
+				layout = "cose";
+			} else if (tempLayout.equals("cola")) {
+				layout = "cola";
+			} else {
+				result += "layout (" + tempLayout + ") is not supported. I used 'cola' layout.\n";
+			}
+		}
+
 		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
 		TreeSet<Link> edgeSet = new TreeSet<Link>();
 
@@ -97,14 +113,14 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "</style>\n";
 			result += "<div id='cy'></div>\n";
 
-			// result += "<br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> \n";
-
 			// result += "<script src='/personal/scripts/cytoscape.js'></script>\n";
 			// result += "<script src='/personal/scripts/cola.js'></script>\n";
 			// result += "<script src='/personal/scripts/cytoscape-cola.js'></script>\n";
 			result += "<script src='https://braincopy.org/WebContent/js/cytoscape.js'></script>\n";
-			result += "<script src='https://braincopy.org/WebContent/js/cola.js'></script>\n";
-			result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
+			if (layout.equals("cola")) {
+				result += "<script src='https://braincopy.org/WebContent/js/cola.js'></script>\n";
+				result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
+			}
 			result += "<script>\n";
 			result += "\tvar cy = cytoscape({\n";
 			result += "\t\tcontainer: document.getElementById('cy'),\n";
@@ -121,10 +137,11 @@ public class CytoscapePlugin implements WikiPlugin {
 					result += nodePageInfo.getStep();
 					if (nodePageInfo.getPicture() != null) {
 						result += "',\n";
-						result += "\t\t\t\t pic: 'attach/" + nodePageInfo.getName() + "/"
+						result += "\t\t\t\t pic: 'attach/"
+								+ URLEncoder.encode(nodePageInfo.getName(), "UTF-8").replace("+", "%20") + "/"
 								+ nodePageInfo.getPicture().getFileName() + "'";
 					} else {
-						result += "WOP'";
+						result += "WOP'";// WithOut Picture
 					}
 				} else {
 					result += nodePageInfo.getStep() + "'";
@@ -144,10 +161,28 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\t],\n";
 
 			result += "\t\tlayout : {\n";
-			result += "\t\t\tname : 'cola',\n";
-			result += "\t\t\tmaxSimulationTime: 600000,\n";
-			result += "\t\t\tpadding: 10},\n";
-
+			if (layout.equals("cola")) {
+				result += "\t\t\tname : 'cola',\n";
+				result += "\t\t\tmaxSimulationTime: 600000,\n";
+				result += "\t\t\tpadding: 10},\n";
+			} else if (layout.equals("cose")) {
+				result += "\t\t\tname: 'cose',\n";
+				result += "\t\t\tidealEdgeLength: 100,\n";
+				result += "\t\t\tnodeOverlap: 20,\n";
+				result += "\t\t\trefresh: 20,\n";
+				result += "\t\t\tfit: true,\n";
+				result += "\t\t\tpadding: 30,\n";
+				result += "\t\t\trandomize: false,\n";
+				result += "\t\t\tcomponentSpacing: 100,\n";
+				result += "\t\t\tnodeRepulsion: 400000,\n";
+				result += "\t\t\tedgeElasticity: 100,\n";
+				result += "\t\t\tnestingFactor: 5,\n";
+				result += "\t\t\tgravity: 80,\n";
+				result += "\t\t\tnumIter: 1000,\n";
+				result += "\t\t\tinitialTemp: 200,\n";
+				result += "\t\t\tcoolingFactor: 0.95,\n";
+				result += "\t\t\tminTemp: 1.0\n\t\t},\n";
+			}
 			result += "\t\tstyle: [{\n";
 			result += "\t\t\tselector: 'node',\n";
 			result += "\t\t\tstyle: {\n";
@@ -246,6 +281,9 @@ public class CytoscapePlugin implements WikiPlugin {
 
 		} catch (ProviderException e) {
 			result += "something happens related to Attachment Issues.";
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			result += "UTF-8 is not supported!? No way";
 			e.printStackTrace();
 		}
 

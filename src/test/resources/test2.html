@@ -181,8 +181,6 @@ var LocalizedStrings = {		"javascript.dialog.styles" : "Additional Styles",
 
 
 
-
-
 </head>
 
 <body class="context-view">
@@ -1084,9 +1082,25 @@ var LocalizedStrings = {		"javascript.dialog.styles" : "Additional Styles",
 										}
 									} ],
 							layout : {
-								name : 'cola',
-								maxSimulationTime : 600000,
-								padding : 10
+				                name: 'cose',
+				                idealEdgeLength: 100,
+				                nodeOverlap: 20,
+				                refresh: 20,
+				                fit: true,
+				                padding: 30,
+				                randomize: false,
+				                componentSpacing: 100,
+				                nodeRepulsion: 400000,
+				                edgeElasticity: 100,
+				                nestingFactor: 5,
+				                gravity: 80,
+				                numIter: 1000,
+				                initialTemp: 200,
+				                coolingFactor: 0.95,
+				                minTemp: 1.0
+								//name : 'cola',
+								//maxSimulationTime : 600000,
+								//padding : 10
 							},
 							style : [ {
 								selector : 'node',
