@@ -268,7 +268,7 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\t\t}\n";
 			result += "\t\t}]\n";
 			result += "\t});\n";
-			result += "\tcy.on('click', 'node', function(evt) {\n";
+			result += "\tcy.on('tap', 'node', function(evt) {\n";
 			result += "\t\tvar arg = new Object;\n";
 			result += "\t\tvar pair=location.search.substring(1).split('&');\n";
 			result += "\t\tfor(var i=0;pair[i];i++) {\n";
@@ -276,6 +276,9 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\t\targ[kv[0]]=kv[1];\n";
 			result += "\t\t}\n";
 			result += "\t\twindow.location.href='Wiki.jsp?page='+arg.page+'&target_node='+this.id();\n";
+			result += "\t});\n";
+			result += "\tcy.on('cxttap', 'node', function(evt) {\n";
+			result += "\t\twindow.location.href='Wiki.jsp?page='+this.id();\n";
 			result += "\t});\n";
 			result += "</script>\n";
 

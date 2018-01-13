@@ -1181,7 +1181,7 @@ var LocalizedStrings = {		"javascript.dialog.styles" : "Additional Styles",
 								}
 							} ]
 						});
-						cy.on('click', 'node', function(evt) {
+						cy.on('tap', 'node', function(evt) {
 							var arg = new Object;
 							var pair = location.search.substring(1).split('&');
 							for (var i = 0; pair[i]; i++) {
@@ -1191,7 +1191,16 @@ var LocalizedStrings = {		"javascript.dialog.styles" : "Additional Styles",
 							window.location.href = 'Wiki.jsp?page=' + arg.page
 									+ '&target_node=' + this.id();
 						});
-					</script>
+						cy.on('cxttap', 'node', function(evt) {
+							var arg = new Object;
+							var pair = location.search.substring(1).split('&');
+							for (var i = 0; pair[i]; i++) {
+								var kv = pair[i].split('=');
+								arg[kv[0]] = kv[1];
+							}
+							window.location.href = 'Wiki.jsp?page=' + this.id();
+						});
+						</script>
 
 					</p>
 
