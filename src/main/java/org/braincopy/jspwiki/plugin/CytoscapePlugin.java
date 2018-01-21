@@ -98,7 +98,7 @@ public class CytoscapePlugin implements WikiPlugin {
 		WikiEngine engine = context.getEngine();
 
 		try {
-			result += readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
+			readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
 
 			result += "hello " + pagename + "<br>\n";
 			result += "total page number: " + nodeSet.size() + "<br/>\n";
@@ -109,6 +109,18 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\tposition: absolute;\n";
 			result += "\t\ttop: 10px;\n";
 			result += "\t\tleft: 10%;\n";
+			result += "\t}\n";
+			result += "\t.header{\n";
+			result += "\t\tdisplay: none;\n";
+			result += "\t}\n";
+			result += "\t.footer{\n";
+			result += "\t\tdisplay: none;\n";
+			result += "\t}\n";
+			result += "\t.sidebar{\n";
+			result += "\t\tdisplay: none;\n";
+			result += "\t}\n";
+			result += "\t.content:after{\n";
+			result += "\t\tdisplay: none;\n";
 			result += "\t}\n";
 			result += "</style>\n";
 			result += "<div id='cy'></div>\n";
@@ -126,11 +138,12 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\tcontainer: document.getElementById('cy'),\n";
 			result += "\t\telements: [\n";
 
-			Iterator<PageInformation> localNodesIte = nodeSet.iterator();
-			Iterator<Link> localLinksIte = edgeSet.iterator();
-			PageInformation nodePageInfo = null;
-			while (localNodesIte.hasNext()) {
-				nodePageInfo = localNodesIte.next();
+			for (PageInformation nodePageInfo : nodeSet) {
+
+				// Iterator<PageInformation> localNodesIte = nodeSet.iterator();
+				// PageInformation nodePageInfo = null;
+				// while (localNodesIte.hasNext()) {
+				// nodePageInfo = localNodesIte.next();
 				result += "\t\t\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
 				result += "\t\t\t\t group: 'L";
 				if (nodePageInfo.getStep() <= 1) {
@@ -148,13 +161,15 @@ public class CytoscapePlugin implements WikiPlugin {
 				}
 				result += "} },\n";
 			}
+
 			Link link = null;
+			Iterator<Link> localLinksIte = edgeSet.iterator();
 			while (localLinksIte.hasNext()) {
 				link = localLinksIte.next();
 				result += "\t\t\t{ data: {\n";
 				result += "\t\t\t\tid: '_" + link.getName() + "',\n";
-				result += "\t\t\t\tsource: '" + link.getSource() + "',\n";
-				result += "\t\t\t\ttarget: '" + link.getTarget() + "'}},\n";
+				result += "\t\t\t\tsource: '" + link.getSourceName() + "',\n";
+				result += "\t\t\t\ttarget: '" + link.getTargetName() + "'}},\n";
 			}
 			result += "\t\t\t{ data: { id: '" + pagename + "' } }\n";
 
@@ -294,6 +309,7 @@ public class CytoscapePlugin implements WikiPlugin {
 	}
 
 	/**
+	 * recursive method to create pageInfomation TreeSet and Link TreeSet.
 	 * 
 	 * @param engine
 	 * @param pagename
@@ -303,9 +319,12 @@ public class CytoscapePlugin implements WikiPlugin {
 	 * @return
 	 * @throws ProviderException
 	 */
-	protected String readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
+	// protected String readNodeAndEdge(WikiEngine engine, String pagename,
+	// TreeSet<PageInformation> nodeSet,
+	protected PageInformation readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
 			TreeSet<Link> edgeSet, int depth, int max_depth) throws ProviderException {
-		String result = "";
+		// String result = "";
+		PageInformation result = null;
 		AttachmentManager attachmentManager = engine.getAttachmentManager();
 		PageInformation tmpPageInfo = new PageInformation(pagename, max_depth - depth);
 		if (depth > 0) {
@@ -340,13 +359,19 @@ public class CytoscapePlugin implements WikiPlugin {
 				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
-					if (depth > 1) {
-						edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), pagename, distName));
+					PageInformation distPage = readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
+							max_depth);
+					if (depth > 1 && distPage != null) {
+						// edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(),
+						// pagename, distName));
+						edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), tmpPageInfo, distPage));
 					}
-					result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1, max_depth);
+					// result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
+					// max_depth);
 				}
+				result = tmpPageInfo;
 			} else {
-				result += pagename + " seem not exist.<br>\n";
+				// result += pagename + " seem not exist.<br>\n";
 			}
 			// checkAndAdd(nodeSet, tmpPageInfo);
 		}
