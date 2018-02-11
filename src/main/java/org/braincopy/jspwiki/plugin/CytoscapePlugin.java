@@ -25,7 +25,6 @@ package org.braincopy.jspwiki.plugin;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -79,6 +78,8 @@ public class CytoscapePlugin implements WikiPlugin {
 			}
 		}
 
+		final int DEPTH_SV = 5;
+
 		String layout = "cola";
 		String tempLayout = "";
 		if (params.get("layout") != null) {
@@ -98,7 +99,8 @@ public class CytoscapePlugin implements WikiPlugin {
 		WikiEngine engine = context.getEngine();
 
 		try {
-			readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
+			// readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
+			readNodeAndEdge2(engine, pagename, nodeSet, edgeSet, DEPTH_SV, DEPTH_SV);
 
 			result += "hello " + pagename + "<br>\n";
 			result += "total page number: " + nodeSet.size() + "<br/>\n";
@@ -134,70 +136,53 @@ public class CytoscapePlugin implements WikiPlugin {
 				result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
 			}
 			result += "<script>\n";
+			result += "var data_array = [];\n";
+			result += getNodeDataJson(nodeSet);
+			result += getEdgeDataJson(edgeSet);
+			result += getLayoutParam(layout);
 			result += "\tvar cy = cytoscape({\n";
 			result += "\t\tcontainer: document.getElementById('cy'),\n";
-			result += "\t\telements: [\n";
+			result += "\t\telements: readNodeAndEdge(data_array, node_array, edge_array, 'KM_TOP', " + depth + ", "
+					+ depth + "),\n";
+			/*
+			 * result += "\t\telements: [\n";
+			 * 
+			 * for (PageInformation nodePageInfo : nodeSet) {
+			 * 
+			 * result += "\t\t\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
+			 * result += "\t\t\t\t group: 'L"; if (nodePageInfo.getStep() <= 1) { result +=
+			 * nodePageInfo.getStep(); if (nodePageInfo.getPicture() != null) { result +=
+			 * "',\n"; result += "\t\t\t\t pic: 'attach/" +
+			 * URLEncoder.encode(nodePageInfo.getName(), "UTF-8").replace("+", "%20") + "/"
+			 * + nodePageInfo.getPicture().getFileName() + "'"; } else { result += "WOP'";//
+			 * WithOut Picture } } else { result += nodePageInfo.getStep() + "'"; } result
+			 * += "} },\n"; }
+			 * 
+			 * Link link = null; Iterator<Link> localLinksIte = edgeSet.iterator(); while
+			 * (localLinksIte.hasNext()) { link = localLinksIte.next(); result +=
+			 * "\t\t\t{ data: {\n"; result += "\t\t\t\tid: '_" + link.getName() + "',\n";
+			 * result += "\t\t\t\tsource: '" + link.getSourceName() + "',\n"; result +=
+			 * "\t\t\t\ttarget: '" + link.getTargetName() + "'}},\n"; } result +=
+			 * "\t\t\t{ data: { id: '" + pagename + "' } }\n";
+			 * 
+			 * result += "\t\t],\n";
+			 **/
 
-			for (PageInformation nodePageInfo : nodeSet) {
-
-				// Iterator<PageInformation> localNodesIte = nodeSet.iterator();
-				// PageInformation nodePageInfo = null;
-				// while (localNodesIte.hasNext()) {
-				// nodePageInfo = localNodesIte.next();
-				result += "\t\t\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
-				result += "\t\t\t\t group: 'L";
-				if (nodePageInfo.getStep() <= 1) {
-					result += nodePageInfo.getStep();
-					if (nodePageInfo.getPicture() != null) {
-						result += "',\n";
-						result += "\t\t\t\t pic: 'attach/"
-								+ URLEncoder.encode(nodePageInfo.getName(), "UTF-8").replace("+", "%20") + "/"
-								+ nodePageInfo.getPicture().getFileName() + "'";
-					} else {
-						result += "WOP'";// WithOut Picture
-					}
-				} else {
-					result += nodePageInfo.getStep() + "'";
-				}
-				result += "} },\n";
-			}
-
-			Link link = null;
-			Iterator<Link> localLinksIte = edgeSet.iterator();
-			while (localLinksIte.hasNext()) {
-				link = localLinksIte.next();
-				result += "\t\t\t{ data: {\n";
-				result += "\t\t\t\tid: '_" + link.getName() + "',\n";
-				result += "\t\t\t\tsource: '" + link.getSourceName() + "',\n";
-				result += "\t\t\t\ttarget: '" + link.getTargetName() + "'}},\n";
-			}
-			result += "\t\t\t{ data: { id: '" + pagename + "' } }\n";
-
-			result += "\t\t],\n";
-
-			result += "\t\tlayout : {\n";
-			if (layout.equals("cola")) {
-				result += "\t\t\tname : 'cola',\n";
-				result += "\t\t\tmaxSimulationTime: 600000,\n";
-				result += "\t\t\tpadding: 10},\n";
-			} else if (layout.equals("cose")) {
-				result += "\t\t\tname: 'cose',\n";
-				result += "\t\t\tidealEdgeLength: 100,\n";
-				result += "\t\t\tnodeOverlap: 20,\n";
-				result += "\t\t\trefresh: 20,\n";
-				result += "\t\t\tfit: true,\n";
-				result += "\t\t\tpadding: 30,\n";
-				result += "\t\t\trandomize: false,\n";
-				result += "\t\t\tcomponentSpacing: 100,\n";
-				result += "\t\t\tnodeRepulsion: 400000,\n";
-				result += "\t\t\tedgeElasticity: 100,\n";
-				result += "\t\t\tnestingFactor: 5,\n";
-				result += "\t\t\tgravity: 80,\n";
-				result += "\t\t\tnumIter: 1000,\n";
-				result += "\t\t\tinitialTemp: 200,\n";
-				result += "\t\t\tcoolingFactor: 0.95,\n";
-				result += "\t\t\tminTemp: 1.0\n\t\t},\n";
-			}
+			result += "\t\tlayout : layout_param,\n";
+			/*
+			 * result += "\t\tlayout : {\n"; if (layout.equals("cola")) { result +=
+			 * "\t\t\tname : 'cola',\n"; result += "\t\t\tmaxSimulationTime: 600000,\n";
+			 * result += "\t\t\tpadding: 10},\n"; } else if (layout.equals("cose")) { result
+			 * += "\t\t\tname: 'cose',\n"; result += "\t\t\tidealEdgeLength: 100,\n"; result
+			 * += "\t\t\tnodeOverlap: 20,\n"; result += "\t\t\trefresh: 20,\n"; result +=
+			 * "\t\t\tfit: true,\n"; result += "\t\t\tpadding: 30,\n"; result +=
+			 * "\t\t\trandomize: false,\n"; result += "\t\t\tcomponentSpacing: 100,\n";
+			 * result += "\t\t\tnodeRepulsion: 400000,\n"; result +=
+			 * "\t\t\tedgeElasticity: 100,\n"; result += "\t\t\tnestingFactor: 5,\n"; result
+			 * += "\t\t\tgravity: 80,\n"; result += "\t\t\tnumIter: 1000,\n"; result +=
+			 * "\t\t\tinitialTemp: 200,\n"; result += "\t\t\tcoolingFactor: 0.95,\n"; result
+			 * += "\t\t\tminTemp: 1.0\n\t\t},\n"; }
+			 */
 			result += "\t\tstyle: [{\n";
 			result += "\t\t\tselector: 'node',\n";
 			result += "\t\t\tstyle: {\n";
@@ -284,17 +269,27 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "\t\t}]\n";
 			result += "\t});\n";
 			result += "\tcy.on('tap', 'node', function(evt) {\n";
-			result += "\t\tvar arg = new Object;\n";
-			result += "\t\tvar pair=location.search.substring(1).split('&');\n";
-			result += "\t\tfor(var i=0;pair[i];i++) {\n";
-			result += "\t\t\tvar kv = pair[i].split('=');\n";
-			result += "\t\t\targ[kv[0]]=kv[1];\n";
-			result += "\t\t}\n";
-			result += "\t\twindow.location.href='Wiki.jsp?page='+arg.page+'&target_node='+this.id();\n";
+			result += "\t\tdata_array = [];\r\n";
+			result += "\t\tfor (let i = 0; i < node_array.length; i++){\n";
+			result += "\t\t\tnode_array[i].data['group'] = null;\n\t\t}\n";
+			result += "\t\tcy.remove('node');\n";
+			result += "\t\tcy.add(readNodeAndEdge(data_array, node_array, edge_array, this.id(), " + depth + ", "
+					+ depth + "));\n";
+			result += "\t\tvar layout = cy.layout(layout_param);\n";
+			result += "\t\tlayout.run();\n";
+			/*
+			 * result += "\t\tvar arg = new Object;\n"; result +=
+			 * "\t\tvar pair=location.search.substring(1).split('&');\n"; result +=
+			 * "\t\tfor(var i=0;pair[i];i++) {\n"; result +=
+			 * "\t\t\tvar kv = pair[i].split('=');\n"; result +=
+			 * "\t\t\targ[kv[0]]=kv[1];\n"; result += "\t\t}\n"; result +=
+			 * "\t\twindow.location.href='Wiki.jsp?page='+arg.page+'&target_node='+this.id();\n";
+			 */
 			result += "\t});\n";
 			result += "\tcy.on('cxttap', 'node', function(evt) {\n";
 			result += "\t\twindow.location.href='Wiki.jsp?page='+this.id();\n";
 			result += "\t});\n";
+			result += getRecursiveFunction();
 			result += "</script>\n";
 
 		} catch (ProviderException e) {
@@ -305,6 +300,98 @@ public class CytoscapePlugin implements WikiPlugin {
 			e.printStackTrace();
 		}
 
+		return result;
+	}
+
+	protected String getRecursiveFunction() {
+		String result = "";
+		result += "function readNodeAndEdge(data_array, node_array, edge_array, target, depth, depth_origin) {\n";
+		result += "\tfor (let i = 0; i < node_array.length; i++) {\n";
+		result += "\t\tif (node_array[i].data.id == target) {\n";
+		result += "\t\t\tif(node_array[i].data['group']==null){\n";
+		result += "\t\t\t\tif(depth_origin-depth < 2){\n";
+		result += "\t\t\t\t\tif(node_array[i].data.pic == null){\n";
+		result += "\t\t\t\t\t\tnode_array[i].data['group'] = 'L'+(depth_origin-depth)+'WOP';\n";
+		result += "\t\t\t\t\t}else{\n";
+		result += "\t\t\t\t\t\tnode_array[i].data['group'] = 'L'+(depth_origin-depth);\n";
+		result += "\t\t\t\t\t}\n";
+		result += "\t\t\t\t}else{\n";
+		result += "\t\t\t\t\tnode_array[i].data['group'] = 'L'+(depth_origin-depth);\n";
+		result += "\t\t\t}}\n";
+		result += "\t\t\tdata_array.push({\n";
+		result += "\t\t\t\tgroup: 'nodes',\n";
+		result += "\t\t\t\tdata: node_array[i].data});\n";
+		result += "\t\t\tif (depth > 0) {\n";
+		result += "\t\t\t\tfor (let j = 0; j < edge_array.length; j++) {\n";
+		result += "\t\t\t\t\tif (edge_array[j].data.source == target) {\n";
+		result += "\t\t\t\t\t\treadNodeAndEdge(data_array, node_array, edge_array, edge_array[j].data.target, depth-1, depth_origin);\n";
+		result += "\t\t\t\t\t\tdata_array.push({\n";
+		result += "\t\t\t\t\t\t\tgroup: 'edges',\n";
+		result += "\t\t\t\t\t\t\tdata: edge_array[j].data});\n";
+		result += "\t\t\t\t\t}\n";
+		result += "\t\t\t\t}break;\n";
+		result += "\t}}}\n";
+		result += "\treturn data_array;\n";
+		result += "}\n";
+		return result;
+	}
+
+	protected String getLayoutParam(String layout) {
+		String result = "";
+		result += "var layout_param = {\n";
+		if (layout.equals("cola")) {
+			result += "\tname : 'cola',\n";
+			result += "\tmaxSimulationTime: 600000,\n";
+			result += "\tpadding: 10};\n";
+		} else if (layout.equals("cose")) {
+			result += "\tname: 'cose',\n";
+			result += "\tidealEdgeLength: 100,\n";
+			result += "\tnodeOverlap: 20,\n";
+			result += "\trefresh: 20,\n";
+			result += "\tfit: true,\n";
+			result += "\tpadding: 30,\n";
+			result += "\trandomize: false,\n";
+			result += "\tcomponentSpacing: 100,\n";
+			result += "\tnodeRepulsion: 400000,\n";
+			result += "\tedgeElasticity: 100,\n";
+			result += "\tnestingFactor: 5,\n";
+			result += "\tgravity: 80,\n";
+			result += "\tnumIter: 1000,\n";
+			result += "\tinitialTemp: 200,\n";
+			result += "\tcoolingFactor: 0.95,\n";
+			result += "\tminTemp: 1.0\n\t\t};\n";
+		}
+		return result;
+	}
+
+	protected String getEdgeDataJson(TreeSet<Link> edgeSet) {
+		String result = "var edge_array = [\n";
+		for (Link link : edgeSet) {
+
+			result += "\t{ data: {\n";
+			result += "\t\tid: '_" + link.getName() + "',\n";
+			result += "\t\tsource: '" + link.getSourceName() + "',\n";
+			result += "\t\ttarget: '" + link.getTargetName() + "'}},\n";
+		}
+		result = result.substring(0, result.length() - 2);
+		result += "];\n";
+		return result;
+	}
+
+	protected String getNodeDataJson(TreeSet<PageInformation> nodeSet) throws UnsupportedEncodingException {
+		String result = "var node_array = [\n";
+		for (PageInformation nodePageInfo : nodeSet) {
+
+			result += "\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
+			if (nodePageInfo.getPicture() != null) {
+				result += "\t pic: 'attach/" + URLEncoder.encode(nodePageInfo.getName(), "UTF-8").replace("+", "%20")
+						+ "/" + nodePageInfo.getPicture().getFileName() + "',\n";
+			}
+			result = result.substring(0, result.length() - 2);
+			result += "} },\n";
+		}
+		result = result.substring(0, result.length() - 2);
+		result += "];\n";
 		return result;
 	}
 
@@ -379,6 +466,77 @@ public class CytoscapePlugin implements WikiPlugin {
 	}
 
 	/**
+	 * recursive method to create pageInfomation TreeSet and Link TreeSet. Simply
+	 * collect nodes and edges without step informatnion.
+	 * 
+	 * @param engine
+	 * @param pagename
+	 * @param nodeSet
+	 * @param edgeSet
+	 * @param depth
+	 * @return
+	 * @throws ProviderException
+	 */
+	// protected String readNodeAndEdge(WikiEngine engine, String pagename,
+	// TreeSet<PageInformation> nodeSet,
+	protected PageInformation readNodeAndEdge2(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
+			TreeSet<Link> edgeSet, int depth, int max_depth) throws ProviderException {
+		// String result = "";
+		PageInformation result = null;
+		AttachmentManager attachmentManager = engine.getAttachmentManager();
+		PageInformation tmpPageInfo = new PageInformation(pagename, max_depth - depth);
+		if (depth > 0 && !nodeSet.contains(tmpPageInfo)) {
+			nodeSet.add(tmpPageInfo);
+			WikiPage page = engine.getPage(pagename);
+			if (page != null) {
+				String pagedata = engine.getPureText(page);
+				WikiContext targetContext = new WikiContext(engine, page);
+
+				@SuppressWarnings("rawtypes")
+				Collection list = attachmentManager.listAttachments(page);
+				if (list.size() > 0) {
+					Object tempObj = list.iterator().next();
+					if (tempObj instanceof Attachment) {
+						String fileName = ((Attachment) tempObj).getFileName();
+						if (Picture.isPictureFileName(fileName)) {
+							try {
+								tmpPageInfo.setPicture(new Picture(fileName));
+							} catch (IllegalFileNameException e) {
+								// do nothing
+							}
+						}
+					}
+				}
+
+				LinkCollector localCollector = new LinkCollector();
+				LinkCollector extCollector = new LinkCollector();
+				LinkCollector attCollector = new LinkCollector();
+
+				targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
+
+				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
+				Collection<String> distNameSet = localCollector.getLinks();
+				for (String distName : distNameSet) {
+					PageInformation distPage = readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
+							max_depth);
+					if (depth > 1 && distPage != null) {
+						// edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(),
+						// pagename, distName));
+						edgeSet.add(new Link(pagename + "2" + distName + distName.hashCode(), tmpPageInfo, distPage));
+					}
+					// result += readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
+					// max_depth);
+				}
+				result = tmpPageInfo;
+			} else {
+				// result += pagename + " seem not exist.<br>\n";
+			}
+			// checkAndAdd(nodeSet, tmpPageInfo);
+		}
+		return result;
+	}
+
+	/**
 	 * If this method return false, you should add the pageInformation object to
 	 * nodeSet.
 	 * 
@@ -395,6 +553,27 @@ public class CytoscapePlugin implements WikiPlugin {
 				} else {
 					nodeSet.remove(pageInfo);
 				}
+				break;
+			}
+		}
+		if (!result)
+			nodeSet.add(checkingPageInfo);
+		return result;
+	}
+
+	/**
+	 * this method does not think the steps If this method return false, you should
+	 * add the pageInformation object to nodeSet.
+	 * 
+	 * @param nodeSet
+	 * @param checkingPageInfo
+	 * @return
+	 */
+	protected boolean checkAndAdd2(TreeSet<PageInformation> nodeSet, PageInformation checkingPageInfo) {
+		boolean result = false;
+		for (PageInformation pageInfo : nodeSet) {
+			if (pageInfo.getPageName().equals(checkingPageInfo.getPageName())) {
+				result = true;
 				break;
 			}
 		}

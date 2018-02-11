@@ -1,6 +1,11 @@
 package org.braincopy.jspwiki.plugin;
 
+import java.io.UnsupportedEncodingException;
 import java.util.TreeSet;
+
+import org.braincopy.IllegalFileNameException;
+import org.braincopy.Link;
+import org.braincopy.Picture;
 
 import junit.framework.TestCase;
 
@@ -35,4 +40,55 @@ public class CytoscapePluginTest extends TestCase {
 
 	}
 
+	public void testGetNodeDataJson() throws IllegalFileNameException {
+		CytoscapePlugin plugin = new CytoscapePlugin();
+		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
+		PageInformation pageInfo1 = new PageInformation("a", 1);
+		pageInfo1.setPicture(new Picture("test.png"));
+		nodeSet.add(pageInfo1);
+		PageInformation pageInfo2 = new PageInformation("b", 2);
+		nodeSet.add(pageInfo2);
+		try {
+			String testStr = plugin.getNodeDataJson(nodeSet);
+			assertTrue(testStr.startsWith("var"));
+			assertTrue(testStr.endsWith("];\n"));
+			System.out.print(testStr);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void testGetEdgeDataJson() throws IllegalFileNameException {
+		CytoscapePlugin plugin = new CytoscapePlugin();
+		TreeSet<Link> edgeSet = new TreeSet<Link>();
+		PageInformation pageInfo1 = new PageInformation("a", 1);
+		pageInfo1.setPicture(new Picture("test.png"));
+		PageInformation pageInfo2 = new PageInformation("b", 2);
+		PageInformation pageInfo3 = new PageInformation("c", 2);
+		Link link1 = new Link("a2b", pageInfo1, pageInfo2);
+		edgeSet.add(link1);
+		Link link2 = new Link("a2c", pageInfo1, pageInfo3);
+		edgeSet.add(link2);
+		String testStr = plugin.getEdgeDataJson(edgeSet);
+		assertTrue(testStr.startsWith("var"));
+		assertTrue(testStr.endsWith("];\n"));
+		System.out.print(testStr);
+	}
+
+	public void testGetLayoutParam() {
+		CytoscapePlugin plugin = new CytoscapePlugin();
+		String testStr = "";
+		testStr = plugin.getLayoutParam("cola");
+		System.out.println(testStr);
+		testStr = plugin.getLayoutParam("cose");
+		System.out.print(testStr);
+	}
+
+	public void testGetRecursiveFunction() {
+		CytoscapePlugin plugin = new CytoscapePlugin();
+		String testStr = "";
+		testStr = plugin.getRecursiveFunction();
+		System.out.print(testStr);
+	}
 }
