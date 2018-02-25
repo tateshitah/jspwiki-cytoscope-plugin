@@ -22,6 +22,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package org.braincopy.jspwiki.plugin;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.wiki.LinkCollector;
+import org.apache.wiki.PageManager;
 import org.apache.wiki.WikiContext;
 import org.apache.wiki.WikiEngine;
 import org.apache.wiki.WikiPage;
@@ -78,7 +80,7 @@ public class CytoscapePlugin implements WikiPlugin {
 			}
 		}
 
-		final int DEPTH_SV = 5;
+		// final int DEPTH_SV = 4;
 
 		String layout = "cola";
 		String tempLayout = "";
@@ -100,7 +102,8 @@ public class CytoscapePlugin implements WikiPlugin {
 
 		try {
 			// readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
-			readNodeAndEdge2(engine, pagename, nodeSet, edgeSet, DEPTH_SV, DEPTH_SV);
+			// readNodeAndEdge2(engine, pagename, nodeSet, edgeSet, DEPTH_SV, DEPTH_SV);
+			createNodeAndEdgeSet(engine, nodeSet, edgeSet);
 
 			result += "hello " + pagename + "<br>\n";
 			result += "total page number: " + nodeSet.size() + "<br/>\n";
@@ -136,6 +139,8 @@ public class CytoscapePlugin implements WikiPlugin {
 				result += "<script src='https://braincopy.org/WebContent/js/cytoscape-cola.js'></script>\n";
 			}
 			result += "<script>\n";
+			result += "let cy_element = document.getElementById(\"cy\");\n";
+			result += "cy_element.style.height = window.innerHeight-20+\"px\";\n";
 			result += "var data_array = [];\n";
 			result += getNodeDataJson(nodeSet);
 			result += getEdgeDataJson(edgeSet);
@@ -298,6 +303,9 @@ public class CytoscapePlugin implements WikiPlugin {
 		} catch (UnsupportedEncodingException e) {
 			result += "UTF-8 is not supported!? No way";
 			e.printStackTrace();
+		} catch (IOException e) {
+			result += "exception in creating node and edge set. " + e;
+			e.printStackTrace();
 		}
 
 		return result;
@@ -395,6 +403,70 @@ public class CytoscapePlugin implements WikiPlugin {
 		return result;
 	}
 
+	protected void createNodeAndEdgeSet(WikiEngine engine, TreeSet<PageInformation> nodeSet, TreeSet<Link> edgeSet)
+			throws ProviderException, IOException {
+		AttachmentManager attachmentManager = engine.getAttachmentManager();
+		PageManager pageMgr = engine.getPageManager();
+		@SuppressWarnings("unchecked")
+		Collection<WikiPage> allPages = pageMgr.getAllPages();
+		for (WikiPage page : allPages) {
+			PageInformation tmpPageInfo = new PageInformation(page.getName());
+			nodeSet.add(tmpPageInfo);
+			@SuppressWarnings("rawtypes")
+			Collection attachmentList = attachmentManager.listAttachments(page);
+			for (Object attachment : attachmentList) {
+				if (attachment instanceof Attachment) {
+					String fileName = ((Attachment) attachment).getFileName();
+					if (Picture.isPictureFileName(fileName)) {
+						try {
+							tmpPageInfo.setPicture(new Picture(fileName));
+						} catch (IllegalFileNameException e) {
+							// do nothing
+						}
+					}
+				}
+			}
+		}
+		for (WikiPage page : allPages) {
+			String pagedata = engine.getPureText(page);
+
+			if (!pagedata.contains("[{CytoscapePlugin")) {
+
+				WikiContext targetContext = new WikiContext(engine, page);
+				LinkCollector localCollector = new LinkCollector();
+				LinkCollector extCollector = new LinkCollector();
+				LinkCollector attCollector = new LinkCollector();
+
+				targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
+				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
+				Collection<String> distNameSet = localCollector.getLinks();
+				for (String distName : distNameSet) {
+					if (engine.pageExists(distName)) {
+						PageInformation sourcePage = getNodeFromName(page.getName(), nodeSet);
+						PageInformation targetPage = getNodeFromName(distName, nodeSet);
+						if (targetPage != null) {
+							edgeSet.add(new Link(page.getName() + "2" + distName + distName.hashCode(), sourcePage,
+									targetPage));
+						}
+					}
+				}
+			}
+		}
+		// System.out.println("#10");
+	}
+
+	protected PageInformation getNodeFromName(String name, TreeSet<PageInformation> nodeSet) {
+		PageInformation result = null;
+		for (PageInformation pageInfo : nodeSet) {
+			if (pageInfo.getName().equals(name)) {
+				result = pageInfo;
+				break;
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * recursive method to create pageInfomation TreeSet and Link TreeSet.
 	 * 
@@ -467,7 +539,7 @@ public class CytoscapePlugin implements WikiPlugin {
 
 	/**
 	 * recursive method to create pageInfomation TreeSet and Link TreeSet. Simply
-	 * collect nodes and edges without step informatnion.
+	 * collect nodes and edges without step information.
 	 * 
 	 * @param engine
 	 * @param pagename
