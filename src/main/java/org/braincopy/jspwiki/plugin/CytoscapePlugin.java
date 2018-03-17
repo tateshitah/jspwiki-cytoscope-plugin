@@ -59,7 +59,7 @@ public class CytoscapePlugin implements WikiPlugin {
 	public String execute(WikiContext context, Map<String, String> params) throws PluginException {
 		String result = "";
 
-		String pagename = "KM_TOP";
+		String pagename = "Main";
 		if (params.get("page") != null) {
 			pagename = params.get("page");
 		}
@@ -101,8 +101,6 @@ public class CytoscapePlugin implements WikiPlugin {
 		WikiEngine engine = context.getEngine();
 
 		try {
-			// readNodeAndEdge(engine, pagename, nodeSet, edgeSet, depth, depth);
-			// readNodeAndEdge2(engine, pagename, nodeSet, edgeSet, DEPTH_SV, DEPTH_SV);
 			createNodeAndEdgeSet(engine, nodeSet, edgeSet);
 
 			result += "hello " + pagename + "<br>\n";
@@ -130,9 +128,6 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += "</style>\n";
 			result += "<div id='cy'></div>\n";
 
-			// result += "<script src='/personal/scripts/cytoscape.js'></script>\n";
-			// result += "<script src='/personal/scripts/cola.js'></script>\n";
-			// result += "<script src='/personal/scripts/cytoscape-cola.js'></script>\n";
 			result += "<script src='https://braincopy.org/WebContent/js/cytoscape.js'></script>\n";
 			if (layout.equals("cola")) {
 				result += "<script src='https://braincopy.org/WebContent/js/cola.js'></script>\n";
@@ -147,47 +142,10 @@ public class CytoscapePlugin implements WikiPlugin {
 			result += getLayoutParam(layout);
 			result += "\tvar cy = cytoscape({\n";
 			result += "\t\tcontainer: document.getElementById('cy'),\n";
-			result += "\t\telements: readNodeAndEdge(data_array, node_array, edge_array, 'KM_TOP', " + depth + ", "
-					+ depth + "),\n";
-			/*
-			 * result += "\t\telements: [\n";
-			 * 
-			 * for (PageInformation nodePageInfo : nodeSet) {
-			 * 
-			 * result += "\t\t\t{ data: { id: '" + nodePageInfo.getPageName() + "',\n";
-			 * result += "\t\t\t\t group: 'L"; if (nodePageInfo.getStep() <= 1) { result +=
-			 * nodePageInfo.getStep(); if (nodePageInfo.getPicture() != null) { result +=
-			 * "',\n"; result += "\t\t\t\t pic: 'attach/" +
-			 * URLEncoder.encode(nodePageInfo.getName(), "UTF-8").replace("+", "%20") + "/"
-			 * + nodePageInfo.getPicture().getFileName() + "'"; } else { result += "WOP'";//
-			 * WithOut Picture } } else { result += nodePageInfo.getStep() + "'"; } result
-			 * += "} },\n"; }
-			 * 
-			 * Link link = null; Iterator<Link> localLinksIte = edgeSet.iterator(); while
-			 * (localLinksIte.hasNext()) { link = localLinksIte.next(); result +=
-			 * "\t\t\t{ data: {\n"; result += "\t\t\t\tid: '_" + link.getName() + "',\n";
-			 * result += "\t\t\t\tsource: '" + link.getSourceName() + "',\n"; result +=
-			 * "\t\t\t\ttarget: '" + link.getTargetName() + "'}},\n"; } result +=
-			 * "\t\t\t{ data: { id: '" + pagename + "' } }\n";
-			 * 
-			 * result += "\t\t],\n";
-			 **/
+			result += "\t\telements: readNodeAndEdge(data_array, node_array, edge_array, '" + pagename + "', " + depth
+					+ ", " + depth + "),\n";
 
 			result += "\t\tlayout : layout_param,\n";
-			/*
-			 * result += "\t\tlayout : {\n"; if (layout.equals("cola")) { result +=
-			 * "\t\t\tname : 'cola',\n"; result += "\t\t\tmaxSimulationTime: 600000,\n";
-			 * result += "\t\t\tpadding: 10},\n"; } else if (layout.equals("cose")) { result
-			 * += "\t\t\tname: 'cose',\n"; result += "\t\t\tidealEdgeLength: 100,\n"; result
-			 * += "\t\t\tnodeOverlap: 20,\n"; result += "\t\t\trefresh: 20,\n"; result +=
-			 * "\t\t\tfit: true,\n"; result += "\t\t\tpadding: 30,\n"; result +=
-			 * "\t\t\trandomize: false,\n"; result += "\t\t\tcomponentSpacing: 100,\n";
-			 * result += "\t\t\tnodeRepulsion: 400000,\n"; result +=
-			 * "\t\t\tedgeElasticity: 100,\n"; result += "\t\t\tnestingFactor: 5,\n"; result
-			 * += "\t\t\tgravity: 80,\n"; result += "\t\t\tnumIter: 1000,\n"; result +=
-			 * "\t\t\tinitialTemp: 200,\n"; result += "\t\t\tcoolingFactor: 0.95,\n"; result
-			 * += "\t\t\tminTemp: 1.0\n\t\t},\n"; }
-			 */
 			result += "\t\tstyle: [{\n";
 			result += "\t\t\tselector: 'node',\n";
 			result += "\t\t\tstyle: {\n";
@@ -282,14 +240,6 @@ public class CytoscapePlugin implements WikiPlugin {
 					+ depth + "));\n";
 			result += "\t\tvar layout = cy.layout(layout_param);\n";
 			result += "\t\tlayout.run();\n";
-			/*
-			 * result += "\t\tvar arg = new Object;\n"; result +=
-			 * "\t\tvar pair=location.search.substring(1).split('&');\n"; result +=
-			 * "\t\tfor(var i=0;pair[i];i++) {\n"; result +=
-			 * "\t\t\tvar kv = pair[i].split('=');\n"; result +=
-			 * "\t\t\targ[kv[0]]=kv[1];\n"; result += "\t\t}\n"; result +=
-			 * "\t\twindow.location.href='Wiki.jsp?page='+arg.page+'&target_node='+this.id();\n";
-			 */
 			result += "\t});\n";
 			result += "\tcy.on('cxttap', 'node', function(evt) {\n";
 			result += "\t\twindow.location.href='Wiki.jsp?page='+this.id();\n";
@@ -478,8 +428,6 @@ public class CytoscapePlugin implements WikiPlugin {
 	 * @return
 	 * @throws ProviderException
 	 */
-	// protected String readNodeAndEdge(WikiEngine engine, String pagename,
-	// TreeSet<PageInformation> nodeSet,
 	protected PageInformation readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
 			TreeSet<Link> edgeSet, int depth, int max_depth) throws ProviderException {
 		// String result = "";
