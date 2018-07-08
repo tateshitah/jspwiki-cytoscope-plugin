@@ -10513,11 +10513,14 @@ var LocalizedStrings = {		"javascript.dialog.styles" : "Additional Styles",
 									}
 								} ];
 					</script>
-					<script src='../../../etc/js/jspwiki-cytoscape-plugin.js'></script>
+					<script src='../../../etc/js/jspwiki-cytoscape-plugin.js'></script> 
+<!-- 					<script src='https://braincopy.org/WebContent/js/jspwiki-cytoscape-plugin.js'></script>-->
 					<script type="text/javascript">
-					cy.add(readNodeAndEdge(data_array, node_array,
-							edge_array, 'Main', 2, 2));
-						const layout = cy.layout(layout_param_cose);
+						depth=2;
+						cy.add(readNodeAndEdge(data_array, node_array,
+							edge_array, 'Main', depth, depth));
+						let layout_param = layout_param_cose;
+						const layout = cy.layout(layout_param);
 						layout.run();
 					</script>
 
