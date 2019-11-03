@@ -136,8 +136,7 @@ cy.on('tap', 'node', function(evt) {
 		node_array[i].data['group'] = null;
 	}
 	cy.remove('node');
-	cy
-			.add(readNodeAndEdge(data_array, node_array, edge_array, this.id(),
+	cy.add(readNodeAndEdge(data_array, node_array, edge_array, this.id(),
 					depth, depth));
 	let layout = cy.layout(layout_param);
 	layout.run();

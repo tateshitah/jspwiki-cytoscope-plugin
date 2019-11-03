@@ -1,19 +1,24 @@
 package org.braincopy.jspwiki.plugin;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.UnsupportedEncodingException;
 import java.util.TreeSet;
 
 import org.braincopy.IllegalFileNameException;
 import org.braincopy.Link;
 import org.braincopy.Picture;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+//import junit.framework.TestCase;
 
-public class CytoscapePluginTest extends TestCase {
+public class CytoscapePluginTest  {
 
 	/**
 	 * 
 	 */
+	@Test
 	public void testCloserPageExist() {
 
 		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
@@ -40,6 +45,7 @@ public class CytoscapePluginTest extends TestCase {
 
 	}
 
+	@Test
 	public void testGetNodeDataJson() throws IllegalFileNameException {
 		CytoscapePlugin plugin = new CytoscapePlugin();
 		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
@@ -59,6 +65,7 @@ public class CytoscapePluginTest extends TestCase {
 		}
 	}
 
+	@Test
 	public void testGetEdgeDataJson() throws IllegalFileNameException {
 		CytoscapePlugin plugin = new CytoscapePlugin();
 		TreeSet<Link> edgeSet = new TreeSet<Link>();
@@ -76,6 +83,7 @@ public class CytoscapePluginTest extends TestCase {
 		System.out.print(testStr);
 	}
 
+	@Test
 	public void testGetLayoutParam() {
 		CytoscapePlugin plugin = new CytoscapePlugin();
 		String testStr = "";
@@ -85,6 +93,7 @@ public class CytoscapePluginTest extends TestCase {
 		System.out.print(testStr);
 	}
 
+	@Test
 	public void testGetRecursiveFunction() {
 		CytoscapePlugin plugin = new CytoscapePlugin();
 		String testStr = "";
