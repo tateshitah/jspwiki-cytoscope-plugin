@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2017-2019 Hiroaki Tateshita
+Copyright (c) 2017-2022 Hiroaki Tateshita
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,15 @@ import org.apache.wiki.LinkCollector;
 import org.apache.wiki.WikiContext;
 import org.apache.wiki.WikiEngine;
 import org.apache.wiki.WikiPage;
+import org.apache.wiki.api.core.Context;
+import org.apache.wiki.api.core.Page;
 import org.apache.wiki.api.exceptions.PluginException;
 import org.apache.wiki.api.exceptions.ProviderException;
-import org.apache.wiki.api.plugin.WikiPlugin;
+import org.apache.wiki.api.plugin.Plugin;
 import org.apache.wiki.attachment.Attachment;
 import org.apache.wiki.attachment.AttachmentManager;
 import org.apache.wiki.pages.PageManager;
+import org.apache.wiki.render.RenderingManager;
 import org.braincopy.IllegalFileNameException;
 import org.braincopy.Link;
 import org.braincopy.Picture;
@@ -47,8 +50,11 @@ import org.braincopy.Picture;
  * @author Hiroaki Tateshita
  *
  */
-public class CytoscapePlugin implements WikiPlugin {
+public class CytoscapePlugin implements Plugin {
 
+	private AttachmentManager attachmentManager;
+	private PageManager pageManager;
+	private RenderingManager renderingManager;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -56,7 +62,7 @@ public class CytoscapePlugin implements WikiPlugin {
 	 * org.apache.wiki.api.plugin.WikiPlugin#execute(org.apache.wiki.WikiContext,
 	 * java.util.Map)
 	 */
-	public String execute(WikiContext context, Map<String, String> params) throws PluginException {
+	public String execute(Context context, Map<String, String> params) throws PluginException {
 		String result = "";
 
 		String pagename = "Main";
@@ -98,7 +104,11 @@ public class CytoscapePlugin implements WikiPlugin {
 		TreeSet<PageInformation> nodeSet = new TreeSet<PageInformation>();
 		TreeSet<Link> edgeSet = new TreeSet<Link>();
 
-		WikiEngine engine = context.getEngine();
+		WikiEngine engine = (WikiEngine) context.getEngine();
+
+		pageManager = engine.getManager(PageManager.class);
+		attachmentManager = engine.getManager(AttachmentManager.class);
+		renderingManager = engine.getManager(RenderingManager.class);
 
 		try {
 			createNodeAndEdgeSet(engine, nodeSet, edgeSet);
@@ -264,11 +274,12 @@ public class CytoscapePlugin implements WikiPlugin {
 
 	protected void createNodeAndEdgeSet(WikiEngine engine, TreeSet<PageInformation> nodeSet, TreeSet<Link> edgeSet)
 			throws ProviderException, IOException {
-		AttachmentManager attachmentManager = engine.getAttachmentManager();
-		PageManager pageMgr = engine.getPageManager();
-		@SuppressWarnings("unchecked")
-		Collection<WikiPage> allPages = pageMgr.getAllPages();
-		for (WikiPage page : allPages) {
+		//AttachmentManager attachmentManager = engine.getManager(AttachmentManager.class);
+		//PageManager pageMgr = engine.getManager(PageManager.class);
+		
+		//@SuppressWarnings("unchecked")
+		Collection<Page> allPages = pageManager.getAllPages();
+		for (Page page : allPages) {
 			PageInformation tmpPageInfo = new PageInformation(page.getName());
 			nodeSet.add(tmpPageInfo);
 			@SuppressWarnings("rawtypes")
@@ -286,8 +297,8 @@ public class CytoscapePlugin implements WikiPlugin {
 				}
 			}
 		}
-		for (WikiPage page : allPages) {
-			String pagedata = engine.getPureText(page);
+		for (Page page : allPages) {
+			String pagedata = pageManager.getPureText(page);
 
 			if (!pagedata.contains("[{CytoscapePlugin")) {
 
@@ -296,11 +307,11 @@ public class CytoscapePlugin implements WikiPlugin {
 				LinkCollector extCollector = new LinkCollector();
 				LinkCollector attCollector = new LinkCollector();
 
-				targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
-				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
+				//targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
+				renderingManager.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
-					if (engine.pageExists(distName)) {
+					if (pageManager.pageExists(distName)) {
 						PageInformation sourcePage = getNodeFromName(page.getName(), nodeSet);
 						PageInformation targetPage = getNodeFromName(distName, nodeSet);
 						if (targetPage != null) {
@@ -339,15 +350,14 @@ public class CytoscapePlugin implements WikiPlugin {
 	 */
 	protected PageInformation readNodeAndEdge(WikiEngine engine, String pagename, TreeSet<PageInformation> nodeSet,
 			TreeSet<Link> edgeSet, int depth, int max_depth) throws ProviderException {
-		// String result = "";
 		PageInformation result = null;
-		AttachmentManager attachmentManager = engine.getAttachmentManager();
+		//attachmentManager = engine.getManager(AttachmentManager.class);
 		PageInformation tmpPageInfo = new PageInformation(pagename, max_depth - depth);
 		if (depth > 0) {
 			checkAndAdd(nodeSet, tmpPageInfo);
-			WikiPage page = engine.getPage(pagename);
+			WikiPage page = (WikiPage) pageManager.getPage(pagename);
 			if (page != null) {
-				String pagedata = engine.getPureText(page);
+				String pagedata = pageManager.getPureText(page);
 				WikiContext targetContext = new WikiContext(engine, page);
 
 				@SuppressWarnings("rawtypes")
@@ -370,9 +380,9 @@ public class CytoscapePlugin implements WikiPlugin {
 				LinkCollector extCollector = new LinkCollector();
 				LinkCollector attCollector = new LinkCollector();
 
-				targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
+				//targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
 
-				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
+				renderingManager.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
 					PageInformation distPage = readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
@@ -412,13 +422,13 @@ public class CytoscapePlugin implements WikiPlugin {
 			TreeSet<Link> edgeSet, int depth, int max_depth) throws ProviderException {
 		// String result = "";
 		PageInformation result = null;
-		AttachmentManager attachmentManager = engine.getAttachmentManager();
+		//AttachmentManager attachmentManager = engine.getAttachmentManager();
 		PageInformation tmpPageInfo = new PageInformation(pagename, max_depth - depth);
 		if (depth > 0 && !nodeSet.contains(tmpPageInfo)) {
 			nodeSet.add(tmpPageInfo);
-			WikiPage page = engine.getPage(pagename);
+			WikiPage page = (WikiPage) pageManager.getPage(pagename);
 			if (page != null) {
-				String pagedata = engine.getPureText(page);
+				String pagedata = pageManager.getPureText(page);
 				WikiContext targetContext = new WikiContext(engine, page);
 
 				@SuppressWarnings("rawtypes")
@@ -441,9 +451,9 @@ public class CytoscapePlugin implements WikiPlugin {
 				LinkCollector extCollector = new LinkCollector();
 				LinkCollector attCollector = new LinkCollector();
 
-				targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
+				//targetContext.setVariable(WikiEngine.PROP_REFSTYLE, "absolute");
 
-				engine.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
+				renderingManager.textToHTML(targetContext, pagedata, localCollector, extCollector, attCollector);
 				Collection<String> distNameSet = localCollector.getLinks();
 				for (String distName : distNameSet) {
 					PageInformation distPage = readNodeAndEdge(engine, distName, nodeSet, edgeSet, depth - 1,
